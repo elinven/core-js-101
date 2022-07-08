@@ -224,19 +224,9 @@ function getRectangleString(width, height) {
  *
  */
 function encodeToRot13(str) {
-  const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLM';
-  const lower = 'abcdefghijklmnopqrstuvwxyzabcdefghijklm';
-  const a = str.split('');
-  for (let i = 0; i < a.length; i + 1) {
-    if (a[i].match(/[a-zA-Z]/)) {
-      if (a[i] === a[i].toUpperCase()) {
-        a[i] = upper[upper.indexOf(a[i]) + 13];
-      } else {
-        a[i] = lower[lower.indexOf(a[i]) + 13];
-      }
-    }
-  }
-  return a.join('');
+  const a = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  const r = 'NOPQRSTUVWXYZABCDEFGHIJKLMnopqrstuvwxyzabcdefghijklm';
+  return str.replace(/[a-z]/gi, (c) => r[a.indexOf(c)]);
 }
 
 /**
