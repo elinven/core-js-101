@@ -112,35 +112,65 @@ function fromJSON(proto, json) {
  *  For more examples see unit tests.
  */
 
-const cssSelectorBuilder = {
-  element(/* value */) {
-    throw new Error('Not implemented');
-  },
-
-  id(/* value */) {
-    throw new Error('Not implemented');
-  },
-
-  class(/* value */) {
-    throw new Error('Not implemented');
-  },
-
-  attr(/* value */) {
-    throw new Error('Not implemented');
-  },
-
-  pseudoClass(/* value */) {
-    throw new Error('Not implemented');
-  },
-
-  pseudoElement(/* value */) {
-    throw new Error('Not implemented');
-  },
-
-  combine(/* selector1, combinator, selector2 */) {
-    throw new Error('Not implemented');
-  },
+const p = {
+  element: 0,
+  id: 1,
+  class: 2,
+  attr: 3,
+  pseudoClass: 4,
+  pseudoElement: 5,
 };
+
+const err1 = 'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element';
+const err2 = 'Element, id and pseudo-element should not occur more then one time inside the selector';
+
+class SB {
+  constructor(a = [], validate = true) {
+    this.a = a;
+    if (validate) {
+      for (let i = 1; i < a.length; i += 1) {
+        if (p[this.a[i - 1][0]] > p[this.a[i][0]]) throw new Error(err1);
+      }
+    }
+  }
+
+  element(s) {
+    if (this.a.some((e) => e[0] === 'element')) throw new Error(err2);
+    return new SB(this.a.concat([['element', s]]));
+  }
+
+  id(s) {
+    if (this.a.some((e) => e[0] === 'id')) throw new Error(err2);
+    return new SB(this.a.concat([['id', `#${s}`]]));
+  }
+
+  class(s) {
+    return new SB(this.a.concat([['class', `.${s}`]]));
+  }
+
+  attr(s) {
+    return new SB(this.a.concat([['attr', `[${s}]`]]));
+  }
+
+  pseudoClass(s) {
+    return new SB(this.a.concat([['pseudoClass', `:${s}`]]));
+  }
+
+  pseudoElement(s) {
+    if (this.a.some((e) => e[0] === 'pseudoElement')) throw new Error(err2);
+    return new SB(this.a.concat([['pseudoElement', `::${s}`]]));
+  }
+
+  combine(s1, c, s2) {
+    return new SB(this.a.concat(s1.a).concat([['element', ` ${c} `]]).concat(s2.a), false);
+  }
+
+  stringify() {
+    return this.a.map((e) => e[1]).join('');
+  }
+}
+
+const cssSelectorBuilder = new SB();
 
 
 module.exports = {
